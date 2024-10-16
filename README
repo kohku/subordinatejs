@@ -1,0 +1,7 @@
+# Command Invoker
+
+Utility that implements the chain-of-responsibilty pattern.
+
+Useful on long runing/multiple activities processing queues.
+
+Help to undo actions where possible.
