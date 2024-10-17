@@ -1,3 +1,4 @@
+import { Command } from "types/processing";
 import { executeRecursive } from "./recursive";
 
 jest.useFakeTimers({ advanceTimers: true });
@@ -29,10 +30,10 @@ describe('recursive', () => {
 
   it ('iterates over the queue recursively, copy the queue', async() => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => lambda(el, (i+1) * 250));
+    const theQueue = list.map<Command<string>>((el, i) => lambda(el, (i+1) * 250));
     const originalLength = theQueue.length;
 
-    const response = await executeRecursive(theQueue);
+    const response = await executeRecursive<string>(theQueue);
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -45,12 +46,12 @@ describe('recursive', () => {
 
   it ('iterates over the queue recursively, empty the queue', async() => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => lambda(el, (i+1) * 250));
+    const theQueue = list.map<Command<string>>((el, i) => lambda(el, (i+1) * 250));
 
     jest.spyOn(global, 'setTimeout');
     jest.spyOn(Promise, 'resolve');
 
-    const response = await executeRecursive(theQueue, { snapshot: false });
+    const response = await executeRecursive<string>(theQueue, { snapshot: false });
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -63,9 +64,9 @@ describe('recursive', () => {
 
   it ('iterates over the queue recursively, continue on failures', async () => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
+    const theQueue = list.map<Command<string>>((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
 
-    const response = await executeRecursive(theQueue, { continueOnFailures: true });
+    const response = await executeRecursive<string>(theQueue, { continueOnFailures: true });
 
     expect(response).toEqual(['1',undefined,'3']);
     // calling one set time out for each element in the list
@@ -76,9 +77,9 @@ describe('recursive', () => {
 
   it ('iterates over the queue recursively, stop on failures', async () => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject('Whooops'));
+    const theQueue = list.map<Command<string>>((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject('Whooops'));
 
-    const response = executeRecursive(theQueue, { continueOnFailures: false });
+    const response = executeRecursive<string>(theQueue, { continueOnFailures: false });
 
     await expect(response).rejects.toMatch('Whooops');
   });

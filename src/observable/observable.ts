@@ -1,12 +1,13 @@
+type Callback = (...args: unknown[]) => void;
 
 interface DinamycEvent {
-  [key: string]: Array<(...args: unknown[]) => void>;
+  [key: string]: Array<Callback>;
 }
 
 class Observable {
   private callbacks: DinamycEvent = {}
 
-  subscribe(event: string, fn: () => void) {
+  subscribe(event: string, fn: Callback) {
     this.callbacks = this.callbacks ?? {};
     this.callbacks[event] = this.callbacks[event] ?? [];
     if (this.callbacks[event].indexOf(fn) < 0) {
@@ -15,7 +16,7 @@ class Observable {
     return this;
   }
 
-  unsubscribe(event: string, fn: () => void) {
+  unsubscribe(event: string, fn: Callback) {
     this.callbacks = this.callbacks ?? {};
 
     // all
@@ -50,7 +51,7 @@ class Observable {
     return this;
   }
 
-  trigger(event: string, ...args: unknown[]) {
+  broadcast(event: string, ...args: unknown[]) {
     this.callbacks = this.callbacks || {};
     let callbacks = this.callbacks[event];
 

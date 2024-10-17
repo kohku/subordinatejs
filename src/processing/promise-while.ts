@@ -2,7 +2,7 @@ import { Command, Condition } from "types/processing";
 
 export const promiseWhile = (
   condition: Condition,
-  fn: Command,
+  fn: Command<void>,
 ) => (
   new Promise<void>((resolve, reject) => {
     const loop = () => Promise.resolve(condition())

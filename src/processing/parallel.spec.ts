@@ -1,3 +1,4 @@
+import { Command } from 'types/processing';
 import { executeParallel } from './parallel';
 
 jest.useFakeTimers({ advanceTimers: true });
@@ -19,10 +20,10 @@ describe('parallel', () => {
 
   it ('iterates over the queue in parallel, copy the queue', async() => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => lambda(el, (i+1) * 250));
+    const theQueue = list.map<Command<string>>((el, i) => lambda(el, (i+1) * 250));
     const originalLength = theQueue.length;
 
-    const response = await executeParallel(theQueue);
+    const response = await executeParallel<string>(theQueue);
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -35,9 +36,9 @@ describe('parallel', () => {
 
   it ('iterates over the queue in parallel, empty the queue', async() => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => lambda(el, (i+1) * 250));
+    const theQueue = list.map<Command<string>>((el, i) => lambda(el, (i+1) * 250));
 
-    const response = await executeParallel(theQueue, { snapshot: false });
+    const response = await executeParallel<string>(theQueue, { snapshot: false });
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -50,9 +51,9 @@ describe('parallel', () => {
 
   it ('iterates over the queue in parallel, continue on failures', async () => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
+    const theQueue = list.map<Command<string>>((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
 
-    const response = await executeParallel(theQueue, { continueOnFailures: true });
+    const response = await executeParallel<string>(theQueue, { continueOnFailures: true });
 
     expect(response).toEqual(['1',undefined,'3']);
     // calling one set time out for each element in the list
@@ -63,9 +64,9 @@ describe('parallel', () => {
 
   it ('iterates over the queue in parallel, stop on failures', async () => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject('Whooops'));
+    const theQueue = list.map<Command<string>>((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject('Whooops'));
 
-    const response = executeParallel(theQueue, { continueOnFailures: false });
+    const response = executeParallel<string>(theQueue, { continueOnFailures: false });
 
     await expect(response).rejects.toMatch('Whooops');
   });

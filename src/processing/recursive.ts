@@ -1,14 +1,14 @@
+import { Command, ProcessingOptions } from "types/processing";
 import { promiseWhile } from "./promise-while";
 import { dequeue } from "./dequeue";
-import { Command, ProcessingOptions } from "types/processing";
 
-export const executeRecursive = (
-  queue: Array<Command>,
+export const executeRecursive = <T = unknown>(
+  queue: Array<Command<T>>,
   options?: Partial<ProcessingOptions>,
-): Promise<unknown[]> => {
+): Promise<Array<T | undefined>> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
-  const values: Array<unknown> = [];
+  const values: Array<T | undefined> = [];
   const iterator = dequeue(snapshot ? [...queue] : queue);
 
   let command = iterator.next();
@@ -17,7 +17,7 @@ export const executeRecursive = (
     () => Promise.resolve(!!command.done),
     async () => {
       try {
-        const task = command.value as Command;
+        const task = command.value as Command<T>;
         const response = await Promise.resolve(task());
         values.push(response);
         command = iterator.next();

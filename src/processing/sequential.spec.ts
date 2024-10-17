@@ -1,3 +1,4 @@
+import { Command } from 'types/processing';
 import { executeSequential } from "./sequential";
 
 jest.useFakeTimers({ advanceTimers: true });
@@ -22,7 +23,7 @@ describe('sequential', () => {
     const theQueue = list.map((el, i, arr) => lambda(el, (arr.length - i) * 250));
     const originalLength = theQueue.length;
 
-    const response = await executeSequential(theQueue);
+    const response = await executeSequential<string>(theQueue);
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -37,7 +38,7 @@ describe('sequential', () => {
     const list: string[] = ['1','2','3'];
     const theQueue = list.map((el, i) => lambda(el, (i+1) * 250));
 
-    const response = await executeSequential(theQueue, { snapshot: false });
+    const response = await executeSequential<string>(theQueue, { snapshot: false });
 
     expect(response).toEqual(list);
     // calling one set time out for each element in the list
@@ -50,9 +51,9 @@ describe('sequential', () => {
 
   it ('iterates over the queue sequentially, continue on failures', async () => {
     const list: string[] = ['1','2','3'];
-    const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
+    const theQueue = list.map<Command<string>>((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject());
 
-    const response = await executeSequential(theQueue, { continueOnFailures: true });
+    const response = await executeSequential<string>(theQueue, { continueOnFailures: true });
 
     expect(response).toEqual(['1',undefined,'3']);
     // calling one set time out for each element in the list
@@ -65,7 +66,7 @@ describe('sequential', () => {
     const list: string[] = ['1','2','3'];
     const theQueue = list.map((el, i) => el !== '2' ? lambda(el, (i+1) * 250) : () => Promise.reject('Whooops'));
 
-    const response = executeSequential(theQueue, { continueOnFailures: false });
+    const response = executeSequential<string>(theQueue, { continueOnFailures: false });
 
     await expect(response).rejects.toMatch('Whooops');
   });

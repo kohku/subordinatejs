@@ -1,4 +1,5 @@
 import { asyncDequeue, dequeue } from "./dequeue";
+import { Command } from '../types/processing';
 
 describe('dequeue', () => {
   it ('iterates over a list and get its values', async () => {
@@ -6,7 +7,7 @@ describe('dequeue', () => {
     const list = [1, 2, 3];
     const queue = list.map((item) => () => Promise.resolve(item));
 
-    const iterator = dequeue(queue);
+    const iterator = dequeue<Command<number>>(queue);
 
     const nextSpy = jest.spyOn(iterator, 'next');
 
@@ -27,7 +28,7 @@ describe('dequeue', () => {
     const list = [1, 2, 3];
     const queue = list.map((item) => () => Promise.resolve(item));
 
-    const iterator = asyncDequeue(queue);
+    const iterator = asyncDequeue<Command<number>>(queue);
 
     const nextSpy = jest.spyOn(iterator, 'next');
 
