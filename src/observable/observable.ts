@@ -5,9 +5,9 @@ interface DinamycEvent {
 }
 
 class Observable {
-  private callbacks: DinamycEvent = {};
+  private callbacks?: DinamycEvent;
 
-  subscribe(event: string, fn: Callback) {
+  subscribe(event: string, fn: Callback): this {
     this.callbacks = this.callbacks ?? {};
     this.callbacks[event] = this.callbacks[event] ?? [];
     if (this.callbacks[event].indexOf(fn) < 0) {
@@ -16,11 +16,11 @@ class Observable {
     return this;
   }
 
-  unsubscribe(event: string, fn: Callback) {
+  unsubscribe(event?: string, fn?: Callback): this {
     this.callbacks = this.callbacks ?? {};
 
     // all
-    if (arguments.length === 0) {
+    if (!event) {
       this.callbacks = {};
       return this;
     }
@@ -32,7 +32,7 @@ class Observable {
     }
 
     // remove all handlers
-    if (arguments.length === 1) {
+    if (!fn) {
       delete this.callbacks[event];
       return this;
     }
@@ -51,7 +51,7 @@ class Observable {
     return this;
   }
 
-  broadcast(event: string, ...args: unknown[]) {
+  emit(event: string, ...args: unknown[]): this {
     this.callbacks = this.callbacks || {};
     let callbacks = this.callbacks[event];
 

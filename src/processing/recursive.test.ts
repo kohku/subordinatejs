@@ -29,6 +29,11 @@ describe("recursive", () => {
     jest.spyOn(Promise, "resolve");
   });
 
+  it ("empty queue", async() => {
+    const response = await executeRecursive<string>([]);
+    expect(response).toBeUndefined();
+  });
+
   it("iterates over the queue recursively, copy the queue", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
