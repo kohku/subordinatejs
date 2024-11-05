@@ -1,31 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Observable from "observable/observable";
-import { Command } from "types/processing";
-
+import { executeRecursive } from "processing/recursive";
+import { ProcessingOptions, TaskCommand } from "processing/types";
 
 class Subordinate extends Observable {
+  private commandChain: Array<TaskCommand> = [];
 
-  private commandChain: Array<Command> = [];
-  private commandStack: Array<Command> = [];
-  private redoStack: Array<Command> = [];
-
-  enqueue<T = unknown>(command: Command<T>, undo?: Command<T>) {
-
+  constructor(private initiator?: any) {
+    super();
   }
 
-  dequeue() {
-
+  addTask(command: TaskCommand): this {
+    this.commandChain.push(command);
+    return this;
   }
 
-  execute() {
-
+  removeTask(): this {
+    return this;
   }
 
-  canUndo() {
+  async execute<R>(
+    initialState: unknown,
+    options?: Partial<ProcessingOptions>,
+  ): Promise<R | undefined> {
+    const value = await executeRecursive<R>(
+      this.commandChain,
+      options,
+      initialState,
+      this.initiator,
+    );
 
+    return value;
   }
 
-  undo() {
+  canUndo() {}
 
+  undo(): this {
+    return this;
   }
 }
 

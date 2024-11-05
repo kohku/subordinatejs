@@ -1,6 +1,6 @@
-import type { JestConfigWithTsJest  } from 'ts-jest';
-import { pathsToModuleNameMapper } from 'ts-jest';
-import { compilerOptions } from './tsconfig.json';
+import type { JestConfigWithTsJest } from "ts-jest";
+import { pathsToModuleNameMapper } from "ts-jest";
+import { compilerOptions } from "./tsconfig.json";
 
 const config: JestConfigWithTsJest = {
   // All imported modules in your tests should be mocked automatically
@@ -19,19 +19,16 @@ const config: JestConfigWithTsJest = {
   collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!**/index.ts'
-  ],
+  collectCoverageFrom: ["src/**/*.ts", "!**/index.ts"],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: [
-    '<rootDir>/build/',
-    '<rootDir>/dist/',
-    '/node_modules/'
+    "<rootDir>/build/",
+    "<rootDir>/dist/",
+    "/node_modules/",
   ],
 
   // Indicates which provider should be used to instrument code for coverage
@@ -108,7 +105,7 @@ const config: JestConfigWithTsJest = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -166,9 +163,9 @@ const config: JestConfigWithTsJest = {
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
-    '<rootDir>/build/',
-    '<rootDir>/dist/',
-    '/node_modules/'
+    "<rootDir>/build/",
+    "<rootDir>/dist/",
+    "/node_modules/",
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

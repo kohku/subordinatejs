@@ -1,10 +1,11 @@
-import { Command, ProcessingOptions } from "types/processing";
+import { StatelessCommand, ProcessingOptions } from "processing/types";
 import { dequeue } from "./dequeue";
 
-export const executeParallel = <T = unknown>(
-  queue: Array<Command<T>>,
+export const executeParallel = (
+  queue: Array<StatelessCommand>,
   options?: Partial<ProcessingOptions>,
-): Promise<Array<T | undefined>> => {
+  initiator?: unknown,
+): Promise<Array<unknown>> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
   const iterator = dequeue(snapshot ? [...queue] : queue);
@@ -13,20 +14,18 @@ export const executeParallel = <T = unknown>(
 
   let command = iterator.next();
 
-  while(!command.done) {
-    promises.push(command.value());
+  while (!command.done) {
+    promises.push(Promise.resolve(command.value(initiator)));
 
     command = iterator.next();
   }
 
   if (continueOnFailures) {
-    return Promise.allSettled(promises).then((results) => (
-      results.map((result) => (
-        result.status === 'fulfilled'
-        ? result.value
-        : undefined
-      ))
-    ));
+    return Promise.allSettled(promises).then((results) =>
+      results.map((result) =>
+        result.status === "fulfilled" ? result.value : undefined,
+      ),
+    );
   }
 
   return Promise.all(promises);

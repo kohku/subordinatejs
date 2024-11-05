@@ -5,7 +5,7 @@ interface DinamycEvent {
 }
 
 class Observable {
-  private callbacks: DinamycEvent = {}
+  private callbacks: DinamycEvent = {};
 
   subscribe(event: string, fn: Callback) {
     this.callbacks = this.callbacks ?? {};

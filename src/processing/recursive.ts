@@ -1,34 +1,48 @@
-import { Command, ProcessingOptions } from "types/processing";
+import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { promiseWhile } from "./promise-while";
 import { dequeue } from "./dequeue";
 
-export const executeRecursive = <T = unknown>(
-  queue: Array<Command<T>>,
+export const executeRecursive = async <T = unknown>(
+  queue: Array<ChainedCommand<T>>,
   options?: Partial<ProcessingOptions>,
-): Promise<Array<T | undefined>> => {
+  initialState?: unknown,
+  initiator?: unknown,
+): Promise<T | undefined> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
-  const values: Array<T | undefined> = [];
-  const iterator = dequeue(snapshot ? [...queue] : queue);
+  let value: T | undefined = undefined;
+  const iterator = dequeue<ChainedCommand<T>>(snapshot ? [...queue] : queue);
 
   let command = iterator.next();
 
-  return promiseWhile(
+  if (command.done) {
+    return value;
+  }
+
+  const task = command.value;
+  value = await Promise.resolve(task(initialState, initiator));
+
+  command = iterator.next();
+
+  await promiseWhile(
     () => Promise.resolve(!!command.done),
     async () => {
       try {
-        const task = command.value as Command<T>;
-        const response = await Promise.resolve(task());
-        values.push(response);
+        const state = value;
+        const task = command.value;
+        if (task){
+          value = await Promise.resolve(task(state, initiator));
+        }
         command = iterator.next();
-      } 
-      catch (error) {
-        values.push(undefined);
+      } catch (error) {
+        value = undefined;
         if (!continueOnFailures) {
           throw error;
         }
         command = iterator.next();
       }
-    }
-  ).then(() => values);
-}
+    },
+  );
+
+  return value;
+};

@@ -8,7 +8,8 @@
     "start": "ts-node src/index.ts",
     "lint": "eslint ./src/**/*.ts",
     "test": "jest --runInBand --verbose",
-    "prepublish": "npm run build" 
+    "prepublish": "npm run build",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -28,7 +29,7 @@
   },
   "homepage": "https://github.com/kohku/subordinatejs#readme",
   "lint-staged": {
-    "*.ts": "prettier --write",
+    "*.ts": "prettier --write --ignore-unknown",
     "**/src/**/*.ts": "eslint"
   },
   "devDependencies": {
@@ -39,7 +40,9 @@
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.9.0",
+    "husky": "^9.1.6",
     "jest": "^29.7.0",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

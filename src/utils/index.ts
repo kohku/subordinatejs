@@ -1,2 +1,2 @@
-export * from './check';
-export * from './performance-meter';
+export * from "./check";
+export * from "./performance-meter";
