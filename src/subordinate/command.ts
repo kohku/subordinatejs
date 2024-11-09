@@ -11,7 +11,7 @@ class CommandClass {
   execute<T = unknown>(...args: unknown[]): Promise<T> | T | void {}
 
   emit(message: string) {
-    this.initiator?.broadcast(message);
+    this.initiator?.emit(message);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

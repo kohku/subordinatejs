@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "allowJs": true,
+    "target": "ES6",
+    "module": "ESNext",
     "baseUrl": "./",
     "paths": {
       "processing/*": ["src/processing/*"],
@@ -9,9 +10,12 @@
       "utils/*": ["src/utils/*"],
       "observable/*": ["src/observable/*"]
     },
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "declaration": true,
-    "outDir": "./dist",
+    "declarationDir": "./bin/types",
+    "outDir": "./bin",
+    "rootDir": "./src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
