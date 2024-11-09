@@ -13,6 +13,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "declaration": true,
+    "removeComments": true,
     "declarationDir": "./bin/types",
     "outDir": "./bin",
     "rootDir": "./src",

@@ -3,8 +3,8 @@
   "version": "1.0.0-alpha.1",
   "description": "Module to help encapsulate method invocation",
   "type": "commonjs",
-  "main": "./bin/index.js",
-  "types": "./bin/types/index.d.js",
+  "main": "bin/index.js",
+  "types": "bin/types/index.d.js",
   "bin": {
     "subordinate": "bin/index.js"
   },
