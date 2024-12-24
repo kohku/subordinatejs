@@ -26,7 +26,7 @@ export type StatelessCommand<Subject, Return = void> = Command<Subject, void, Re
 // Does not care about the subject
 export type AnonynousCommand<State, Return = void> = Command<void, State, Return>
 
-// Allow us to chain commands, without paying attention to subject and state
+// Used to define chained commands, without paying attention to subject and state
 export type ChainedCommand<Return = void> = Command<any, any, Return>;
 
 // Only cares about the return value

@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Observable from "observable/observable";
-import { executeRecursive } from "processing/recursive";
+import { executeRecursive } from "processing/index";
 import { ProcessingOptions, Task } from "processing/types";
 
 class Subordinate<Subject> extends Observable {
   private commandChain: Array<Task> = [];
+  private executor = executeRecursive
 
   constructor(private subject?: Subject) {
     super();
@@ -30,7 +30,7 @@ class Subordinate<Subject> extends Observable {
     initialValue?: T,
     options?: Partial<ProcessingOptions>,
   ): Promise<T | undefined> {
-    const value = await executeRecursive<T, Subject>(
+    const value = await this.executor<T, Subject>(
       this.commandChain,
       options,
       initialValue,

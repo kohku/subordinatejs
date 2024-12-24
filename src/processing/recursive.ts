@@ -25,13 +25,22 @@ export const executeRecursive = async <T = void, Subject = unknown>(
 
   let command = iterator.next();
 
+  // Extract the first command to use the initial value
   if (command.done) {
     return value;
   }
 
-  const task = command.value;
-  value = await Promise.resolve(task({ subject, state: initialState }));
+  try {
+    const task = command.value;
+    value = await Promise.resolve(task({ subject, state: initialState }));
+  } catch (error) {
+    value = undefined;
+    if (!continueOnFailures) {
+      throw error;
+    }
+  }
 
+  // Move to the next command
   command = iterator.next();
 
   await promiseWhile(

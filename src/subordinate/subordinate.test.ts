@@ -17,12 +17,12 @@ describe("Subordinate", () => {
       color: 'black',
     };
 
-    // Commands does know about previous commands
+    // Commands does know about previous commands' state
     const changeBackground = (color: string): StatelessCommand<Subject> => ({ subject }) => {
       subject.background = color;
     };
 
-    // Commands does know about previous commands
+    // Commands does know about previous commands' state
     const changeColor = (color: string): StatelessCommand<Subject> => ({ subject }) => {
       subject.color = color;
     };
@@ -48,12 +48,14 @@ describe("Subordinate", () => {
 
     const subordinate = new Subordinate(square);
 
+    // Commands does know about previous commands' state
     const grow: StatelessCommand<Shape, string> = ({ subject }) => {
       subject.width += 10;
       subject.height += 10;
       return subject.color;
     };
 
+    // Commands does know about previous commands' state
     const makeRedIfWhite: ActionCommand<Shape, string> = ({ subject, state }) => {
       if (state === 'white') {
         subject.color = 'red';
@@ -82,6 +84,7 @@ describe("Subordinate", () => {
   });
 
   it ('can calculate the fibonacci sequence', async () => {
+    // using commands that retain the state between steps
     const fibonacciStep: ActionCommand<{ value: number }, number[], number[]> = ({
       subject, state
     }) => {
@@ -102,7 +105,7 @@ describe("Subordinate", () => {
 
     subordinate.addTask(task);
 
-    const result = await subordinate.execute();
+    const result = await subordinate.execute<Array<number>>();
 
     expect(result).toEqual([0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]);
   });
