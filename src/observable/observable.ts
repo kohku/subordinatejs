@@ -1,4 +1,4 @@
-type Callback = (...args: unknown[]) => void;
+import { Callback } from "processing/types";
 
 interface DinamycEvent {
   [key: string]: Array<Callback>;

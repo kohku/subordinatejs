@@ -1,5 +1,6 @@
 import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { asyncDequeue } from "./dequeue";
+import { ProcessingEvent } from "./events";
 
 export const executeSequential = async <T = void, Subject = unknown>(
   queue: Array<ChainedCommand<T>>,
@@ -13,18 +14,22 @@ export const executeSequential = async <T = void, Subject = unknown>(
   const iterator = asyncDequeue(snapshot ? [...queue] : queue);
 
   let command = await iterator.next();
+  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   while (!command.done) {
     try {
       const value = await command.value({ subject, state: initialState });
+      options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
       values.push(value);
-    } catch (e) {
+    } catch (error) {
+      options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
       if (!continueOnFailures) {
-        throw e;
+        throw error;
       }
       values.push(undefined);
     }
     command = await iterator.next();
+    options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
   }
 
   return values;

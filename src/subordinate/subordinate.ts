@@ -1,6 +1,7 @@
 import Observable from "observable/observable";
 import { executeRecursive } from "processing/index";
 import { ProcessingOptions, Task } from "processing/types";
+import { ProcessingEvent } from "../processing/events";
 
 class Subordinate<Subject> extends Observable {
   private commandChain: Array<Task> = [];
@@ -28,16 +29,28 @@ class Subordinate<Subject> extends Observable {
 
   async execute<T = void>(
     initialValue?: T,
-    options?: Partial<ProcessingOptions>,
+    options?: Partial<Omit<ProcessingOptions, "eventEmitter">>,
   ): Promise<T | undefined> {
-    const value = await this.executor<T, Subject>(
-      this.commandChain,
-      options,
-      initialValue,
-      this.subject,
-    );
-
-    return value;
+    this.emit(ProcessingEvent.Start);
+    try {
+      const value = await this.executor<T, Subject>(
+        this.commandChain,
+        {
+          ...options,
+          eventEmitter: this,
+        },
+        initialValue,
+        this.subject,
+      );
+      return value;
+    }
+    catch (error) {
+      this.emit(ProcessingEvent.Failed, error);
+      throw error;
+    }
+    finally {
+      this.emit(ProcessingEvent.Complete);
+    }
   }
 
   canUndo() {}

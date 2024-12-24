@@ -1,16 +1,7 @@
 import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { promiseWhile } from "./promise-while";
 import { dequeue } from "./dequeue";
-
-// reduce<U>(
-//   callbackfn: (
-//     previousValue: U,
-//     currentValue: T,
-//     currentIndex: number,
-//     array: T[]
-//   ) => U, 
-//   initialValue: U
-// ): U;
+import { ProcessingEvent } from "./events";
 
 export const executeRecursive = async <T = void, Subject = unknown>(
   queue: Array<ChainedCommand<T>>,
@@ -24,6 +15,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
   const iterator = dequeue<ChainedCommand<T>>(snapshot ? [...queue] : queue);
 
   let command = iterator.next();
+  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   // Extract the first command to use the initial value
   if (command.done) {
@@ -33,7 +25,9 @@ export const executeRecursive = async <T = void, Subject = unknown>(
   try {
     const task = command.value;
     value = await Promise.resolve(task({ subject, state: initialState }));
+    options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
   } catch (error) {
+    options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
     value = undefined;
     if (!continueOnFailures) {
       throw error;
@@ -42,6 +36,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
 
   // Move to the next command
   command = iterator.next();
+  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   await promiseWhile(
     () => Promise.resolve(!!command.done),
@@ -51,15 +46,17 @@ export const executeRecursive = async <T = void, Subject = unknown>(
         const task = command.value;
         if (task){
           value = await Promise.resolve(task({ subject, state }));
+          options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
         }
-        command = iterator.next();
       } catch (error) {
-        value = undefined;
+        options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
         if (!continueOnFailures) {
           throw error;
         }
-        command = iterator.next();
+        value = undefined;
       }
+      command = iterator.next();
+      options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
     },
   );
 

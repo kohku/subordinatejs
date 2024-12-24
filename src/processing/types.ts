@@ -2,6 +2,10 @@
 // import CommandClass from "src/subordinate/command";
 // import CommandWrapper from "src/subordinate/command-wrapper";
 
+import Observable from "observable/observable";
+
+export type Callback = (...args: unknown[]) => void;
+
 export type Condition = (...args: unknown[]) => Promise<boolean>;
 
 type CommandArgs<Subject, State> = {
@@ -35,6 +39,7 @@ export type LambdaCommand<Return = void> = Command<void, void, Return>;
 export type ProcessingOptions = {
   snapshot?: boolean;
   continueOnFailures?: boolean;
+  eventEmitter?: Observable;
 };
 
 export type Commandable<Subject, State, Return> = Command<
