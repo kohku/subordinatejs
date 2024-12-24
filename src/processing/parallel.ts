@@ -1,11 +1,11 @@
-import { StatelessCommand, ProcessingOptions } from "processing/types";
+import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { dequeue } from "./dequeue";
 
-export const executeParallel = (
-  queue: Array<StatelessCommand>,
+export const executeParallel = <T = void, Subject = unknown>(
+  queue: Array<ChainedCommand<T>>,
   options?: Partial<ProcessingOptions>,
-  initiator?: unknown,
-): Promise<Array<unknown>> => {
+  subject?: Subject,
+): Promise<Array<T | undefined>> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
   const iterator = dequeue(snapshot ? [...queue] : queue);
@@ -15,7 +15,7 @@ export const executeParallel = (
   let command = iterator.next();
 
   while (!command.done) {
-    promises.push(Promise.resolve(command.value(initiator)));
+    promises.push(Promise.resolve(command.value({ subject, state: undefined })));
 
     command = iterator.next();
   }

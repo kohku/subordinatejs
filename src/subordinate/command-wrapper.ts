@@ -8,17 +8,17 @@
 //   // private validateWrapper: (actionsPerformed: Command[], actionsToPerform: Command[]) => void;
 
 //   constructor({
-//     initiator,
+//     subject,
 //     execute,
 //     undo,
 //     // validate,
 //   }: {
-//     initiator: Subordinate;
+//     subject: Subordinate;
 //     execute: Command | (() => void);
 //     undo?: Command | (() => void);
 //     // validate: (actionsPerformed: Command[], actionsToPerform: Command[]) => void;
 //   }) {
-//     super(initiator);
+//     super(subject);
 //     this.executeWrapper =
 //       typeof execute === "function" ? execute : super.execute;
 //     this.undoWrapper = typeof undo === "function" ? undo : undefined;

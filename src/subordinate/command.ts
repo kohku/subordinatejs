@@ -1,24 +1,24 @@
-import Subordinate from "./subordinate";
+// import Subordinate from "./subordinate";
 
-class CommandClass {
-  initiator?: Subordinate;
+// class CommandClass {
+//   subject?: Subordinate;
 
-  constructor(initiator?: Subordinate) {
-    this.initiator = initiator;
-  }
+//   constructor(subject?: Subordinate) {
+//     this.subject = subject;
+//   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  execute<T = unknown>(...args: unknown[]): Promise<T> | T | void {}
+//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   execute<T = unknown>(...args: unknown[]): Promise<T> | T | void {}
 
-  emit(message: string) {
-    this.initiator?.emit(message);
-  }
+//   emit(message: string) {
+//     this.subject?.emit(message);
+//   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  validate(
-    actionsPerformed: CommandClass[],
-    actionsToPerform: CommandClass[],
-  ) {}
-}
+//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   validate(
+//     actionsPerformed: CommandClass[],
+//     actionsToPerform: CommandClass[],
+//   ) {}
+// }
 
-export default CommandClass;
+// export default CommandClass;

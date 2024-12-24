@@ -1,17 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Observable from "observable/observable";
 import { executeRecursive } from "processing/recursive";
-import { ProcessingOptions, TaskCommand } from "processing/types";
+import { ProcessingOptions, Task } from "processing/types";
 
-class Subordinate extends Observable {
-  private commandChain: Array<TaskCommand> = [];
+class Subordinate<Subject> extends Observable {
+  private commandChain: Array<Task> = [];
 
-  constructor(private initiator?: any) {
+  constructor(private subject?: Subject) {
     super();
   }
 
-  addTask(command: TaskCommand): this {
+  addCommand(command: Task): this {
     this.commandChain.push(command);
+    return this;
+  }
+
+  addTask(task: Array<Task>): this {
+    if (Array.isArray(task)) {
+      task.forEach((command) => this.addCommand(command));
+    }
     return this;
   }
 
@@ -19,15 +26,15 @@ class Subordinate extends Observable {
     return this;
   }
 
-  async execute<R>(
-    initialState: unknown,
+  async execute<T = void>(
+    initialValue?: T,
     options?: Partial<ProcessingOptions>,
-  ): Promise<R | undefined> {
-    const value = await executeRecursive<R>(
+  ): Promise<T | undefined> {
+    const value = await executeRecursive<T, Subject>(
       this.commandChain,
       options,
-      initialState,
-      this.initiator,
+      initialValue,
+      this.subject,
     );
 
     return value;

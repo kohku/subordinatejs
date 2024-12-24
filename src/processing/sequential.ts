@@ -1,11 +1,11 @@
 import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { asyncDequeue } from "./dequeue";
 
-export const executeSequential = async <T = unknown>(
+export const executeSequential = async <T = void, Subject = unknown>(
   queue: Array<ChainedCommand<T>>,
   options?: Partial<ProcessingOptions>,
-  initialState?: unknown,
-  initiator?: unknown,
+  initialState?: T,
+  subject?: Subject,
 ): Promise<Array<T | undefined>> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
@@ -16,7 +16,7 @@ export const executeSequential = async <T = unknown>(
 
   while (!command.done) {
     try {
-      const value = await command.value(initialState, initiator);
+      const value = await command.value({ subject, state: initialState });
       values.push(value);
     } catch (e) {
       if (!continueOnFailures) {

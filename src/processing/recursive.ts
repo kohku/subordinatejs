@@ -2,11 +2,21 @@ import { ChainedCommand, ProcessingOptions } from "processing/types";
 import { promiseWhile } from "./promise-while";
 import { dequeue } from "./dequeue";
 
-export const executeRecursive = async <T = unknown>(
+// reduce<U>(
+//   callbackfn: (
+//     previousValue: U,
+//     currentValue: T,
+//     currentIndex: number,
+//     array: T[]
+//   ) => U, 
+//   initialValue: U
+// ): U;
+
+export const executeRecursive = async <T = void, Subject = unknown>(
   queue: Array<ChainedCommand<T>>,
   options?: Partial<ProcessingOptions>,
-  initialState?: unknown,
-  initiator?: unknown,
+  initialState?: T,
+  subject?: Subject,
 ): Promise<T | undefined> => {
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
@@ -20,7 +30,7 @@ export const executeRecursive = async <T = unknown>(
   }
 
   const task = command.value;
-  value = await Promise.resolve(task(initialState, initiator));
+  value = await Promise.resolve(task({ subject, state: initialState }));
 
   command = iterator.next();
 
@@ -31,7 +41,7 @@ export const executeRecursive = async <T = unknown>(
         const state = value;
         const task = command.value;
         if (task){
-          value = await Promise.resolve(task(state, initiator));
+          value = await Promise.resolve(task({ subject, state }));
         }
         command = iterator.next();
       } catch (error) {
