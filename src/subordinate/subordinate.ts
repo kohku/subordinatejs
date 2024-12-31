@@ -1,10 +1,11 @@
 import Observable from "observable/observable";
 import { executeRecursive } from "processing/index";
-import { ProcessingOptions, Task } from "processing/types";
+import { ChainedCommandable, ProcessingOptions, Task } from "processing/types";
 import { ProcessingEvent } from "../processing/events";
+import CommandWrapper from "./command-wrapper";
 
 class Subordinate<Subject> extends Observable {
-  private commandChain: Array<Task> = [];
+  private commandChain: Array<ChainedCommandable> = [];
   private executor = executeRecursive
 
   constructor(private subject?: Subject) {
@@ -12,7 +13,8 @@ class Subordinate<Subject> extends Observable {
   }
 
   addCommand(command: Task): this {
-    this.commandChain.push(command);
+    const cmd = new CommandWrapper(command);
+    this.commandChain.push(cmd);
     return this;
   }
 
@@ -29,7 +31,7 @@ class Subordinate<Subject> extends Observable {
 
   async execute<T = void>(
     initialValue?: T,
-    options?: Partial<Omit<ProcessingOptions, "eventEmitter">>,
+    options?: Partial<ProcessingOptions>,
   ): Promise<T | undefined> {
     this.emit(ProcessingEvent.Start);
     try {

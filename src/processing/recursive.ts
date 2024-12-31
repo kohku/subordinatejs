@@ -1,10 +1,10 @@
-import { ChainedCommand, ProcessingOptions } from "processing/types";
+import { Commandable, ProcessingOptions } from "processing/types";
 import { promiseWhile } from "./promise-while";
 import { dequeue } from "./dequeue";
 import { ProcessingEvent } from "./events";
 
 export const executeRecursive = async <T = void, Subject = unknown>(
-  queue: Array<ChainedCommand<T>>,
+  queue: Array<Commandable<T>>,
   options?: Partial<ProcessingOptions>,
   initialState?: T,
   subject?: Subject,
@@ -12,7 +12,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
   const snapshot = options?.snapshot ?? true;
   const continueOnFailures = options?.continueOnFailures ?? false;
   let value: T | undefined = undefined;
-  const iterator = dequeue<ChainedCommand<T>>(snapshot ? [...queue] : queue);
+  const iterator = dequeue<Commandable<T>>(snapshot ? [...queue] : queue);
 
   let command = iterator.next();
   options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
@@ -24,7 +24,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
 
   try {
     const task = command.value;
-    value = await Promise.resolve(task({ subject, state: initialState }));
+    value = await Promise.resolve(task.execute({ subject, state: initialState }));
     options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
   } catch (error) {
     options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
@@ -45,7 +45,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
         const state = value;
         const task = command.value;
         if (task){
-          value = await Promise.resolve(task({ subject, state }));
+          value = await Promise.resolve(task.execute({ subject, state }));
           options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
         }
       } catch (error) {

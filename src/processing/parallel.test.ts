@@ -3,14 +3,16 @@ import { executeParallel } from "./parallel";
 jest.useFakeTimers({ advanceTimers: true });
 
 const lambda =
-  (name = "#", timeout = 1000) =>
-  (): Promise<string> =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        // console.log(`Inside lambda ${name}`);
-        resolve(name);
-      }, timeout);
-    });
+  (name = "#", timeout = 1000) => ({
+    execute: (): Promise<string> =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          // console.log(`Inside lambda ${name}`);
+          resolve(name);
+        }, timeout);
+      }),
+  });
+  
 
 describe("parallel", () => {
   beforeAll(() => {
@@ -58,7 +60,7 @@ describe("parallel", () => {
   it("iterates over the queue in parallel, continue on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "2" ? lambda(el, (i + 1) * 250) : () => Promise.reject(),
+      el !== "2" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject() },
     );
 
     const response = await executeParallel(theQueue, {
@@ -75,7 +77,7 @@ describe("parallel", () => {
   it("iterates over the queue in parallel, stop on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "2" ? lambda(el, (i + 1) * 250) : () => Promise.reject("Whooops"),
+      el !== "2" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject("Whooops") },
     );
 
     const response = executeParallel(theQueue, {

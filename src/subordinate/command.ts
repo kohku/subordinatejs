@@ -1,24 +1,13 @@
-// import Subordinate from "./subordinate";
+import { Commandable } from "processing/types";
 
-// class CommandClass {
-//   subject?: Subordinate;
+class CommandClass implements Commandable {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  execute<Subject, State , Return>(_: {
+    subject: Subject;
+    state: State;
+  }): Promise<Return> | Return {
+    throw new Error("Method not implemented.");
+  }
+}
 
-//   constructor(subject?: Subordinate) {
-//     this.subject = subject;
-//   }
-
-//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//   execute<T = unknown>(...args: unknown[]): Promise<T> | T | void {}
-
-//   emit(message: string) {
-//     this.subject?.emit(message);
-//   }
-
-//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//   validate(
-//     actionsPerformed: CommandClass[],
-//     actionsToPerform: CommandClass[],
-//   ) {}
-// }
-
-// export default CommandClass;
+export default CommandClass;

@@ -3,14 +3,16 @@ import { executeSequential } from "./sequential";
 jest.useFakeTimers({ advanceTimers: true });
 
 const lambda =
-  (name = "#", timeout = 1000) =>
-  (): Promise<string> =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Inside lambda ${name}`);
-        resolve(name);
-      }, timeout);
-    });
+  (name = "#", timeout = 1000) => ({
+    execute: (): Promise<string> =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          console.log(`Inside lambda ${name}`);
+          resolve(name);
+        }, timeout);
+      }),
+  });
+ 
 
 describe("sequential", () => {
   beforeAll(() => {
@@ -56,7 +58,7 @@ describe("sequential", () => {
   it("iterates over the queue sequentially, continue on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "2" ? lambda(el, (i + 1) * 250) : () => Promise.reject(),
+      el !== "2" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject() },
     );
 
     const response = await executeSequential<string>(theQueue, {
@@ -73,7 +75,7 @@ describe("sequential", () => {
   it("iterates over the queue sequentially, stop on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "2" ? lambda(el, (i + 1) * 250) : () => Promise.reject("Whooops"),
+      el !== "2" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject("Whooops") },
     );
 
     const response = executeSequential<string>(theQueue, {

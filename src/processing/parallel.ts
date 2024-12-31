@@ -1,9 +1,9 @@
-import { ChainedCommand, ProcessingOptions } from "processing/types";
+import { Commandable, ProcessingOptions } from "processing/types";
 import { dequeue } from "./dequeue";
 import { ProcessingEvent } from "./events";
 
 export const executeParallel = <T = void, Subject = unknown>(
-  queue: Array<ChainedCommand<T>>,
+  queue: Array<Commandable<T>>,
   options?: Partial<ProcessingOptions>,
   subject?: Subject,
 ): Promise<Array<T | undefined>> => {
@@ -17,7 +17,7 @@ export const executeParallel = <T = void, Subject = unknown>(
   options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   while (!command.done) {
-    promises.push(Promise.resolve(command.value({ subject, state: undefined })));
+    promises.push(Promise.resolve(command.value.execute({ subject, state: undefined })));
 
     command = iterator.next();
     options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);

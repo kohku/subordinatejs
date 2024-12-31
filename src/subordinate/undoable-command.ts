@@ -1,11 +1,11 @@
-// import CommandClass from "./command";
+import CommandClass from "./command";
 
-// class UndoableCommand extends CommandClass {
-//   get canUndo() {
-//     return true;
-//   }
+class UndoableCommand extends CommandClass {
+  get canUndo() {
+    return false;
+  }
 
-//   undo() {}
-// }
+  undo() {}
+}
 
-// export default UndoableCommand;
+export default UndoableCommand;

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import CommandClass from "src/subordinate/command";
+import CommandClass from "src/subordinate/command";
 // import CommandWrapper from "src/subordinate/command-wrapper";
 
 import Observable from "observable/observable";
@@ -8,7 +8,7 @@ export type Callback = (...args: unknown[]) => void;
 
 export type Condition = (...args: unknown[]) => Promise<boolean>;
 
-type CommandArgs<Subject, State> = {
+export type CommandArgs<Subject, State> = {
   subject: Subject,
   state: State,
 }
@@ -42,8 +42,8 @@ export type ProcessingOptions = {
   eventEmitter?: Observable;
 };
 
-export type Commandable<Subject, State, Return> = Command<
-  State,
-  Return,
-  Subject
->; //| CommandClass | CommandWrapper;
+export interface Commandable<Return = void> {
+  execute: ChainedCommand<Return>;
+}
+
+export type ChainedCommandable = Commandable<any>;

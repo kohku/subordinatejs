@@ -3,14 +3,15 @@ import { executeRecursive } from "./recursive";
 jest.useFakeTimers({ advanceTimers: true });
 
 const lambda =
-  (name = "#", timeout = 1000) =>
-  (): Promise<string> =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Inside lambda ${name}`);
-        resolve(name);
-      }, timeout);
-    });
+  (name = "#", timeout = 1000) => ({
+    execute: (): Promise<string> =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          console.log(`Inside lambda ${name}`);
+          resolve(name);
+        }, timeout);
+      })
+  });
 
 /*
   based on the this particular test the recursive
@@ -36,7 +37,7 @@ describe("recursive", () => {
 
   it("iterates over the queue recursively, copy the queue", async () => {
     const list: string[] = ["1", "2", "3"];
-    const theQueue = list.map((el, i) =>
+    const theQueue = list.map((el, i) => 
       lambda(el, (i + 1) * 250),
     );
     const originalLength = theQueue.length;
@@ -77,7 +78,7 @@ describe("recursive", () => {
   it("iterates over the queue recursively, continue on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "3" ? lambda(el, (i + 1) * 250) : () => Promise.reject(),
+      el !== "3" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject() },
     );
 
     const response = await executeRecursive<string>(theQueue, {
@@ -88,13 +89,13 @@ describe("recursive", () => {
     // calling one set time out for each element in the list
     expect(setTimeout).toHaveBeenCalledTimes(list.length - 1);
     // Promise.resolve is called in a recursively manner, defined by recursive function
-    // expect(Promise.resolve).toHaveBeenCalledTimes(recursiveFn(list.length));
+    expect(Promise.resolve).toHaveBeenCalledTimes(recursiveFn(list.length));
   });
 
   it("iterates over the queue recursively, stop on failures", async () => {
     const list: string[] = ["1", "2", "3"];
     const theQueue = list.map((el, i) =>
-      el !== "2" ? lambda(el, (i + 1) * 250) : () => Promise.reject("Whooops"),
+      el !== "2" ? lambda(el, (i + 1) * 250) : { execute: () => Promise.reject("Whooops") },
     );
 
     const response = executeRecursive<string>(theQueue, {

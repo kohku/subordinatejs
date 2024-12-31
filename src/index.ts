@@ -6,14 +6,16 @@ import {
 import { PerformanceMeter } from "./utils";
 
 const lambda =
-  (name = "#", timeout = 1000) =>
-  (): Promise<string> =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Inside lambda ${name}`);
-        resolve(name);
-      }, timeout);
-    });
+  (name = "#", timeout = 1000) => ({
+    execute: (): Promise<string> =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          console.log(`Inside lambda ${name}`);
+          resolve(name);
+        }, timeout);
+      }),
+  });
+  
 
 const main = async () => {
   let response, seconds;
