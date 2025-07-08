@@ -1,16 +1,16 @@
 import Observable from "observable/observable";
 import { executeRecursive } from "processing/index";
-import { ChainedCommandable, ProcessingOptions, Task } from "processing/types";
+import { Callback, ChainedCommandable, Commandable, ProcessingOptions, Task } from "processing/types";
 import { ProcessingEvent } from "../processing/events";
 import CommandWrapper from "./command-wrapper";
 
-class Subordinate<Subject> extends Observable {
+class Subordinate<Subject> {
+  private eventEmitter = new Observable();
   private commandChain: Array<ChainedCommandable> = [];
-  private executor = executeRecursive
+  private commandStack: Array<ChainedCommandable> = [];
+  private executor = executeRecursive;
 
-  constructor(private subject?: Subject) {
-    super();
-  }
+  constructor(private subject?: Subject) {}
 
   addCommand(command: Task): this {
     const cmd = new CommandWrapper(command);
@@ -29,17 +29,27 @@ class Subordinate<Subject> extends Observable {
     return this;
   }
 
+  subscribe(event: string, fn: Callback): this {
+    this.eventEmitter.subscribe(event, fn);
+    return this;
+  }
+  
+  unsubscribe(event?: string, fn?: Callback): this {
+    this.eventEmitter.unsubscribe(event, fn);
+    return this;
+  }
+
   async execute<T = void>(
     initialValue?: T,
     options?: Partial<ProcessingOptions>,
   ): Promise<T | undefined> {
-    this.emit(ProcessingEvent.Start);
+    this.eventEmitter.emit(ProcessingEvent.Start);
     try {
       const value = await this.executor<T, Subject>(
         this.commandChain,
         {
           ...options,
-          eventEmitter: this,
+          eventEmitter: this.eventEmitter,
         },
         initialValue,
         this.subject,
@@ -47,11 +57,11 @@ class Subordinate<Subject> extends Observable {
       return value;
     }
     catch (error) {
-      this.emit(ProcessingEvent.Failed, error);
+      this.eventEmitter.emit(ProcessingEvent.Failed, error);
       throw error;
     }
     finally {
-      this.emit(ProcessingEvent.Complete);
+      this.eventEmitter.emit(ProcessingEvent.Complete);
     }
   }
 

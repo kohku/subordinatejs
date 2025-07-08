@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "target": "ES6",
+    "target": "ESNext",
     "module": "ESNext",
     "baseUrl": "./",
     "paths": {
@@ -10,16 +10,20 @@
       "utils/*": ["src/utils/*"],
       "observable/*": ["src/observable/*"]
     },
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "declaration": true,
     "removeComments": true,
     "declarationDir": "./bin/types",
     "outDir": "./bin",
     "rootDir": "./src",
+    "isolatedModules": true,
     "esModuleInterop": true,
+    "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "lib": ["ESNext", "DOM"],
+    "types": ["Node", "jest"],
     "skipLibCheck": true
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/tests/**"],

@@ -30,11 +30,8 @@ export type StatelessCommand<Subject, Return = void> = Command<Subject, void, Re
 // Does not care about the subject
 export type AnonynousCommand<State, Return = void> = Command<void, State, Return>
 
-// Used to define chained commands, without paying attention to subject and state
+// Internal, used to define chained commands, without paying attention to subject and state
 export type ChainedCommand<Return = void> = Command<any, any, Return>;
-
-// Only cares about the return value
-export type LambdaCommand<Return = void> = Command<void, void, Return>;
 
 export type ProcessingOptions = {
   snapshot?: boolean;
@@ -42,8 +39,10 @@ export type ProcessingOptions = {
   eventEmitter?: Observable;
 };
 
+// Internal, used to wrap chained commands
 export interface Commandable<Return = void> {
   execute: ChainedCommand<Return>;
 }
 
+// Internal, used to wrap chained commands
 export type ChainedCommandable = Commandable<any>;
