@@ -2,7 +2,7 @@ import replace from '@rollup/plugin-replace';
 import terser from '@rollup/plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 
-import pkg from './package.json' assert { type: 'json '};
+import pkg from './package.json' assert { type: 'json ' };
 
 export default [
   {
@@ -12,7 +12,7 @@ export default [
         dir: 'bin',
         format: 'cjs',
         banner: '#!/usr/bin/env node',
-      }
+      },
     ],
     plugins: [
       replace({
@@ -21,9 +21,9 @@ export default [
       }),
       typescript({
         clean: true,
-        useTsconfigDeclarationDir: true
+        useTsconfigDeclarationDir: true,
       }),
       terser(),
-    ]
-  }
+    ],
+  },
 ];

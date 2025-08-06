@@ -1,18 +1,17 @@
 import Observable from './observable';
 
 describe('observable', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it ('can instantiate a observable', () => {
+  it('can instantiate a observable', () => {
     const observable = new Observable();
     expect(observable).toBeDefined();
     expect(observable).toBeInstanceOf(Observable);
   });
 
-  it ('emits', () => {
+  it('emits', () => {
     const eventName = 'event1';
     const detail = 'detail';
     const observable = new Observable();
@@ -22,7 +21,7 @@ describe('observable', () => {
     expect(obs).toEqual(observable);
   });
 
-  it ('emits event to registered listeners', () => {
+  it('emits event to registered listeners', () => {
     const eventName = 'event1';
     const detail = 'detail';
     const observable = new Observable();
@@ -38,7 +37,7 @@ describe('observable', () => {
     expect(listener2).toHaveBeenCalledWith(detail);
   });
 
-  it ('doesn\'t emit events to unregistered listeners', () => {
+  it("doesn't emit events to unregistered listeners", () => {
     const eventName = 'event1';
     const detail = 'detail';
     const observable = new Observable();
@@ -53,7 +52,7 @@ describe('observable', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it ('does nothing if unsubscribed not subscribed listeners', () => {
+  it('does nothing if unsubscribed not subscribed listeners', () => {
     const eventName = 'event1';
     const observable = new Observable();
 
@@ -62,7 +61,7 @@ describe('observable', () => {
     observable.unsubscribe(eventName, listener);
   });
 
-  it ('unsubscribe listeners for an event', () => {
+  it('unsubscribe listeners for an event', () => {
     const eventName = 'event1';
     const detail = 'detail';
     const observable = new Observable();
@@ -76,7 +75,7 @@ describe('observable', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it ('unsubscribe all listeners', () => {
+  it('unsubscribe all listeners', () => {
     const eventName = 'event1';
     const detail = 'detail';
     const observable = new Observable();

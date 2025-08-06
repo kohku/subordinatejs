@@ -1,4 +1,4 @@
-import { Callback } from "processing/types";
+import { Callback } from 'processing/types';
 
 interface DinamycEvent {
   [key: string]: Array<Callback>;

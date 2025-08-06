@@ -1,6 +1,6 @@
-import { Commandable, ProcessingOptions } from "processing/types";
-import { dequeue } from "./dequeue";
-import { ProcessingEvent } from "./events";
+import { Commandable, ProcessingOptions } from 'processing/types';
+import { dequeue } from './dequeue';
+import { ProcessingEvent } from './events';
 
 export const executeParallel = <T = void, Subject = unknown>(
   queue: Array<Commandable<T>>,
@@ -17,7 +17,9 @@ export const executeParallel = <T = void, Subject = unknown>(
   options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   while (!command.done) {
-    promises.push(Promise.resolve(command.value.execute({ subject, state: undefined })));
+    promises.push(
+      Promise.resolve(command.value.execute({ subject, state: undefined })),
+    );
 
     command = iterator.next();
     options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
@@ -26,10 +28,13 @@ export const executeParallel = <T = void, Subject = unknown>(
   if (continueOnFailures) {
     return Promise.allSettled(promises).then((results) =>
       results.map((result) => {
-        if (result.status === "fulfilled") {
-          options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, result.value);
+        if (result.status === 'fulfilled') {
+          options?.eventEmitter?.emit(
+            ProcessingEvent.CommandComplete,
+            result.value,
+          );
           return result.value;
-        } 
+        }
         options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, new Error());
         return undefined;
       }),

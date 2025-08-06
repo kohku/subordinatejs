@@ -1,7 +1,7 @@
-import { Commandable, ProcessingOptions } from "processing/types";
-import { promiseWhile } from "./promise-while";
-import { dequeue } from "./dequeue";
-import { ProcessingEvent } from "./events";
+import { Commandable, ProcessingOptions } from 'processing/types';
+import { promiseWhile } from './promise-while';
+import { dequeue } from './dequeue';
+import { ProcessingEvent } from './events';
 
 export const executeRecursive = async <T = void, Subject = unknown>(
   queue: Array<Commandable<T>>,
@@ -24,7 +24,9 @@ export const executeRecursive = async <T = void, Subject = unknown>(
 
   try {
     const task = command.value;
-    value = await Promise.resolve(task.execute({ subject, state: initialState }));
+    value = await Promise.resolve(
+      task.execute({ subject, state: initialState }),
+    );
     options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
   } catch (error) {
     options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
@@ -44,7 +46,7 @@ export const executeRecursive = async <T = void, Subject = unknown>(
       try {
         const state = value;
         const task = command.value;
-        if (task){
+        if (task) {
           value = await Promise.resolve(task.execute({ subject, state }));
           options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
         }

@@ -1,1 +1,1 @@
-export { default } from "./observable";
+export { default } from './observable';

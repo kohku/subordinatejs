@@ -1,6 +1,6 @@
-import { Commandable, ProcessingOptions } from "processing/types";
-import { asyncDequeue } from "./dequeue";
-import { ProcessingEvent } from "./events";
+import { Commandable, ProcessingOptions } from 'processing/types';
+import { asyncDequeue } from './dequeue';
+import { ProcessingEvent } from './events';
 
 export const executeSequential = async <T = void, Subject = unknown>(
   queue: Array<Commandable<T>>,
@@ -18,7 +18,10 @@ export const executeSequential = async <T = void, Subject = unknown>(
 
   while (!command.done) {
     try {
-      const value = await command.value.execute({ subject, state: initialState });
+      const value = await command.value.execute({
+        subject,
+        state: initialState,
+      });
       options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
       values.push(value);
     } catch (error) {

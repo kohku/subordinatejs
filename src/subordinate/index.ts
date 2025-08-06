@@ -1,1 +1,1 @@
-export { default } from "./subordinate";
+export { default } from './subordinate';

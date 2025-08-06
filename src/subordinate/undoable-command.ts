@@ -1,4 +1,4 @@
-import CommandClass from "./command";
+import CommandClass from './command';
 
 class UndoableCommand extends CommandClass {
   get canUndo() {

@@ -1,5 +1,5 @@
-import { Task } from "processing/types";
-import UndoableCommand from "./undoable-command";
+import { Task } from 'processing/types';
+import UndoableCommand from './undoable-command';
 
 class CommandWrapper extends UndoableCommand {
   constructor(

@@ -1,6 +1,9 @@
-import { Condition } from "processing/types";
+import { Condition } from 'processing/types';
 
-export const promiseWhile = (condition: Condition, fn: () => Promise<void> | void) =>
+export const promiseWhile = (
+  condition: Condition,
+  fn: () => Promise<void> | void,
+) =>
   new Promise<void>((resolve, reject) => {
     const loop = () =>
       condition()
@@ -15,5 +18,3 @@ export const promiseWhile = (condition: Condition, fn: () => Promise<void> | voi
 
     return loop();
   });
-
-  

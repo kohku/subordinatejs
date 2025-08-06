@@ -1,14 +1,14 @@
-import { asyncDequeue, dequeue } from "./dequeue";
+import { asyncDequeue, dequeue } from './dequeue';
 
-describe("dequeue", () => {
-  it("iterates over a list and get its values", async () => {
+describe('dequeue', () => {
+  it('iterates over a list and get its values', async () => {
     const promises: Promise<unknown>[] = [];
     const list = [1, 2, 3];
     const queue = list.map((item) => () => Promise.resolve(item));
 
     const iterator = dequeue(queue);
 
-    const nextSpy = jest.spyOn(iterator, "next");
+    const nextSpy = jest.spyOn(iterator, 'next');
 
     let command = iterator.next();
 
@@ -22,14 +22,14 @@ describe("dequeue", () => {
     await expect(Promise.all(promises)).resolves.toEqual(list);
   });
 
-  it("asynchronously iterates over a list and get its values", async () => {
+  it('asynchronously iterates over a list and get its values', async () => {
     const values: number[] = [];
     const list = [1, 2, 3];
     const queue = list.map((item) => () => Promise.resolve(item));
 
     const iterator = asyncDequeue(queue);
 
-    const nextSpy = jest.spyOn(iterator, "next");
+    const nextSpy = jest.spyOn(iterator, 'next');
 
     let command = await iterator.next();
 

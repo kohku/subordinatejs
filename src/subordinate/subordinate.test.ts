@@ -1,13 +1,17 @@
-import { ActionCommand, AnonynousCommand, StatelessCommand } from "../processing/types";
-import Subordinate from "./subordinate";
+import {
+  ActionCommand,
+  AnonynousCommand,
+  StatelessCommand,
+} from '../processing/types';
+import Subordinate from './subordinate';
 
-describe("Subordinate", () => {
-  it("can be instantiated", () => {
+describe('Subordinate', () => {
+  it('can be instantiated', () => {
     const subordinate = new Subordinate();
     expect(subordinate).toBeInstanceOf(Subordinate);
   });
 
-  it ("can add and execute tasks over a subject", async () => {
+  it('can add and execute tasks over a subject', async () => {
     type Subject = {
       background: string;
       color: string;
@@ -18,33 +22,34 @@ describe("Subordinate", () => {
     };
 
     // Commands does know about previous commands' state
-    const changeBackground = (color: string): StatelessCommand<Subject> => ({ subject }) => {
-      subject.background = color;
-    };
+    const changeBackground =
+      (color: string): StatelessCommand<Subject> =>
+      ({ subject }) => {
+        subject.background = color;
+      };
 
     // Commands does know about previous commands' state
-    const changeColor = (color: string): StatelessCommand<Subject> => ({ subject }) => {
-      subject.color = color;
-    };
+    const changeColor =
+      (color: string): StatelessCommand<Subject> =>
+      ({ subject }) => {
+        subject.color = color;
+      };
 
     const subordinate = new Subordinate(subject);
-    subordinate.addTask([
-      changeBackground('red'),
-      changeColor('white'),
-    ]);
+    subordinate.addTask([changeBackground('red'), changeColor('white')]);
     await subordinate.execute();
 
     expect(subject.background).toEqual('red');
     expect(subject.color).toEqual('white');
   });
 
-  it("can add and execute tasks over a subject having a state between steps", async () => {
+  it('can add and execute tasks over a subject having a state between steps', async () => {
     type Shape = {
       width: number;
       height: number;
       color: string;
-    }
-    const square: Shape = { width: 10, height: 10, color: 'white'};
+    };
+    const square: Shape = { width: 10, height: 10, color: 'white' };
 
     const subordinate = new Subordinate(square);
 
@@ -56,7 +61,10 @@ describe("Subordinate", () => {
     };
 
     // Commands does know about previous commands' state
-    const makeRedIfWhite: ActionCommand<Shape, string> = ({ subject, state }) => {
+    const makeRedIfWhite: ActionCommand<Shape, string> = ({
+      subject,
+      state,
+    }) => {
       if (state === 'white') {
         subject.color = 'red';
       }
@@ -68,7 +76,7 @@ describe("Subordinate", () => {
     expect(square.color).toEqual('red');
   });
 
-  it ('can execute several anonymous steps passing state between them', async () => {
+  it('can execute several anonymous steps passing state between them', async () => {
     const step: AnonynousCommand<number, number> = ({ state }) => {
       return state + 1;
     };
@@ -83,11 +91,13 @@ describe("Subordinate", () => {
     expect(result).toEqual(10);
   });
 
-  it ('can calculate the fibonacci sequence', async () => {
+  it('can calculate the fibonacci sequence', async () => {
     // using commands that retain the state between steps
-    const fibonacciStep: ActionCommand<{ value: number }, number[], number[]> = ({
-      subject, state
-    }) => {
+    const fibonacciStep: ActionCommand<
+      { value: number },
+      number[],
+      number[]
+    > = ({ subject, state }) => {
       if (!Array.isArray(state)) {
         subject.value = 1;
         return [0, 1];

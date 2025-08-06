@@ -1,8 +1,14 @@
-import Observable from "observable/observable";
-import { executeRecursive } from "processing/index";
-import { Callback, ChainedCommandable, Commandable, ProcessingOptions, Task } from "processing/types";
-import { ProcessingEvent } from "../processing/events";
-import CommandWrapper from "./command-wrapper";
+import Observable from 'observable/observable';
+import { executeRecursive } from 'processing/index';
+import {
+  Callback,
+  ChainedCommandable,
+  Commandable,
+  ProcessingOptions,
+  Task,
+} from 'processing/types';
+import { ProcessingEvent } from '../processing/events';
+import CommandWrapper from './command-wrapper';
 
 class Subordinate<Subject> {
   private eventEmitter = new Observable();
@@ -33,7 +39,7 @@ class Subordinate<Subject> {
     this.eventEmitter.subscribe(event, fn);
     return this;
   }
-  
+
   unsubscribe(event?: string, fn?: Callback): this {
     this.eventEmitter.unsubscribe(event, fn);
     return this;
@@ -55,12 +61,10 @@ class Subordinate<Subject> {
         this.subject,
       );
       return value;
-    }
-    catch (error) {
+    } catch (error) {
       this.eventEmitter.emit(ProcessingEvent.Failed, error);
       throw error;
-    }
-    finally {
+    } finally {
       this.eventEmitter.emit(ProcessingEvent.Complete);
     }
   }

@@ -1,4 +1,3 @@
-
 export const enum ProcessingEvent {
   Start = 'start',
   NextCommand = 'next-command',
