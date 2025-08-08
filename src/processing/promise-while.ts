@@ -1,20 +1,21 @@
 import { Condition } from 'processing/types';
 
-export const promiseWhile = (
+export const promiseWhile = <T = unknown>(
   condition: Condition,
-  fn: () => Promise<void> | void,
+  fn: (state?: T) => Promise<T | undefined>,
+  initialState?: T
 ) =>
   new Promise<void>((resolve, reject) => {
-    const loop = () =>
+    const loop = (state?: T) =>
       condition()
         .then((done) => {
           if (done) {
             resolve();
           } else {
-            Promise.resolve(fn()).then(loop, reject);
+            Promise.resolve(fn(state)).then(loop, reject);
           }
         })
         .catch(reject);
 
-    return loop();
+    return loop(initialState);
   });

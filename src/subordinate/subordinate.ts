@@ -1,4 +1,4 @@
-import Observable from 'observable/observable';
+import Observable from 'observable/index';
 import { executeRecursive } from 'processing/index';
 import {
   Callback,
@@ -45,20 +45,20 @@ class Subordinate<Subject> {
     return this;
   }
 
-  async execute<T = void>(
-    initialValue?: T,
+  async execute<Return = void>(
+    initialValue?: Return,
     options?: Partial<ProcessingOptions>,
-  ): Promise<T | undefined> {
+  ): Promise<Return | undefined> {
     this.eventEmitter.emit(ProcessingEvent.Start);
     try {
-      const value = await this.executor<T, Subject>(
+      const value = await this.executor<Return, Subject>(
         this.commandChain,
         {
           ...options,
           eventEmitter: this.eventEmitter,
         },
-        initialValue,
         this.subject,
+        initialValue,
       );
       return value;
     } catch (error) {

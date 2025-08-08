@@ -2,44 +2,58 @@ import { Commandable, ProcessingOptions } from 'processing/types';
 import { dequeue } from './dequeue';
 import { ProcessingEvent } from './events';
 
-export const executeParallel = <T = void, Subject = unknown>(
-  queue: Array<Commandable<T>>,
+export const executeParallel = <Return = void, Subject = unknown>(
+  queue: Array<Commandable<Return>>,
   options?: Partial<ProcessingOptions>,
   subject?: Subject,
-): Promise<Array<T | undefined>> => {
+  initialState?: unknown,
+): Promise<Array<Return | undefined>> => {
   const snapshot = options?.snapshot ?? true;
+  const eventEmitter = options?.eventEmitter;
   const continueOnFailures = options?.continueOnFailures ?? false;
   const iterator = dequeue(snapshot ? [...queue] : queue);
 
-  const promises = [];
+  const promises: Array<Promise<Return | undefined>> = [];
 
   let command = iterator.next();
-  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   while (!command.done) {
+    const { value: task } = command;
+    eventEmitter?.emit(ProcessingEvent.NextCommand, initialState, task);
     promises.push(
-      Promise.resolve(command.value.execute({ subject, state: undefined })),
+      Promise.resolve(task.execute({ subject, state: initialState })),
     );
 
     command = iterator.next();
-    options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
   }
 
-  if (continueOnFailures) {
-    return Promise.allSettled(promises).then((results) =>
-      results.map((result) => {
-        if (result.status === 'fulfilled') {
-          options?.eventEmitter?.emit(
-            ProcessingEvent.CommandComplete,
-            result.value,
-          );
-          return result.value;
+  if (!continueOnFailures) {
+    return Promise.all(promises)
+      .then((results) => results.map((result) => {
+        if (result instanceof Error) {
+          eventEmitter?.emit(ProcessingEvent.CommandFailed, result);
+        } else {
+          eventEmitter?.emit(ProcessingEvent.CommandComplete, result);
         }
-        options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, new Error());
-        return undefined;
-      }),
-    );
+        return result;
+    }));
   }
 
-  return Promise.all(promises);
+  return Promise.allSettled(promises).then((results) =>
+    results.map((result) => {  
+      if (result.status === 'fulfilled') {
+        eventEmitter?.emit(
+          ProcessingEvent.CommandComplete,
+          result.value,
+        );
+        return result.value;
+      } else if (result.status === 'rejected') {
+        eventEmitter?.emit(
+          ProcessingEvent.CommandFailed,
+          result.reason,
+        );
+      }
+      return undefined;
+    }),
+  );
 };

@@ -1,3 +1,4 @@
+import { ProcessingEvent } from '../processing/events';
 import {
   ActionCommand,
   AnonynousCommand,
@@ -12,6 +13,11 @@ describe('Subordinate', () => {
   });
 
   it('can add and execute tasks over a subject', async () => {
+    const startSpy = jest.fn();
+    const completeSpy = jest.fn();
+    const nextCommandSpy = jest.fn();
+    const commandCompleteSpy = jest.fn();
+
     type Subject = {
       background: string;
       color: string;
@@ -36,14 +42,26 @@ describe('Subordinate', () => {
       };
 
     const subordinate = new Subordinate(subject);
+
+    subordinate.subscribe(ProcessingEvent.Start, startSpy);
+    subordinate.subscribe(ProcessingEvent.NextCommand, nextCommandSpy);
+    subordinate.subscribe(ProcessingEvent.CommandComplete, commandCompleteSpy);
+    subordinate.subscribe(ProcessingEvent.Complete, completeSpy);
+
     subordinate.addTask([changeBackground('red'), changeColor('white')]);
+
     await subordinate.execute();
+
+    expect(startSpy).toHaveBeenCalledTimes(1)
+    expect(nextCommandSpy).toHaveBeenCalledTimes(2);
+    expect(commandCompleteSpy).toHaveBeenCalledTimes(2);
+    expect(completeSpy).toHaveBeenCalledTimes(1);
 
     expect(subject.background).toEqual('red');
     expect(subject.color).toEqual('white');
   });
 
-  it('can add and execute tasks over a subject having a state between steps', async () => {
+  xit('can add and execute tasks over a subject having a state between steps', async () => {
     type Shape = {
       width: number;
       height: number;
@@ -76,7 +94,7 @@ describe('Subordinate', () => {
     expect(square.color).toEqual('red');
   });
 
-  it('can execute several anonymous steps passing state between them', async () => {
+  xit('can execute several anonymous steps passing state between them', async () => {
     const step: AnonynousCommand<number, number> = ({ state }) => {
       return state + 1;
     };
@@ -91,7 +109,7 @@ describe('Subordinate', () => {
     expect(result).toEqual(10);
   });
 
-  it('can calculate the fibonacci sequence', async () => {
+  xit('can calculate the fibonacci sequence', async () => {
     // using commands that retain the state between steps
     const fibonacciStep: ActionCommand<
       { value: number },

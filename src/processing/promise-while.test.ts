@@ -17,8 +17,8 @@ describe('promiseWhile', () => {
     ).then(() => values);
 
     expect(response.length).toEqual(2);
-    expect(response).toContain(1);
-    expect(response).toContain(2);
+    expect(response).toEqual([1, 2]);
+    expect(values).toEqual([1, 2]);
   });
 
   it('iterates on lambda array', async () => {
@@ -37,8 +37,33 @@ describe('promiseWhile', () => {
     ).then(() => values);
 
     expect(response.length).toEqual(2);
-    expect(response).toContain(1);
-    expect(response).toContain(2);
+    expect(response).toEqual([1, 2]);
+    expect(values).toEqual([1, 2]);
+  });
+
+  it('pass values between iterations on lambda array', async () => {
+    const values: Array<number> = [];
+    const lambdas = [
+      (value?: number) => Promise.resolve((value ?? 0) + 1),
+      (value?: number) => Promise.resolve((value ?? 0) + 2),
+    ];
+
+    const response = await promiseWhile<number>(
+      () => Promise.resolve(lambdas.length === 0),
+      async (state?: number) => {
+        const next = lambdas.shift();
+        if (next) {
+          const value = await next(state);
+          values.push(value);
+          return value;
+        }
+      },
+      0
+    ).then(() => values);
+
+    expect(response.length).toEqual(2);
+    expect(response).toEqual([1, 3]);
+    expect(values).toEqual([1, 3]);
   });
 
   it('exits the loop if one of the steps is a rejected promise', async () => {

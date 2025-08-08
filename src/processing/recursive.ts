@@ -3,64 +3,46 @@ import { promiseWhile } from './promise-while';
 import { dequeue } from './dequeue';
 import { ProcessingEvent } from './events';
 
-export const executeRecursive = async <T = void, Subject = unknown>(
-  queue: Array<Commandable<T>>,
+export const executeRecursive = async <Return = void, Subject = unknown>(
+  queue: Array<Commandable<unknown>>,
   options?: Partial<ProcessingOptions>,
-  initialState?: T,
   subject?: Subject,
-): Promise<T | undefined> => {
+  initialState?: unknown,
+): Promise<Return | undefined> => {
   const snapshot = options?.snapshot ?? true;
+  const eventEmitter = options?.eventEmitter;
   const continueOnFailures = options?.continueOnFailures ?? false;
-  let value: T | undefined = undefined;
-  const iterator = dequeue<Commandable<T>>(snapshot ? [...queue] : queue);
+  let value: unknown = initialState;
+  const iterator = dequeue<Commandable<unknown>>(snapshot ? [...queue] : queue);
 
   let command = iterator.next();
-  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
-
-  // Extract the first command to use the initial value
+  // Nothing to do
   if (command.done) {
-    return value;
+    return undefined;
   }
-
-  try {
-    const task = command.value;
-    value = await Promise.resolve(
-      task.execute({ subject, state: initialState }),
-    );
-    options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
-  } catch (error) {
-    options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
-    value = undefined;
-    if (!continueOnFailures) {
-      throw error;
-    }
-  }
-
-  // Move to the next command
-  command = iterator.next();
-  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   await promiseWhile(
     () => Promise.resolve(!!command.done),
-    async () => {
+    async (state: unknown) => {
+      const { value: task } = command;
       try {
-        const state = value;
-        const task = command.value;
         if (task) {
+          eventEmitter?.emit(ProcessingEvent.NextCommand, state, task);
           value = await Promise.resolve(task.execute({ subject, state }));
-          options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
+          eventEmitter?.emit(ProcessingEvent.CommandComplete, value, task);
         }
       } catch (error) {
-        options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
+        eventEmitter?.emit(ProcessingEvent.CommandFailed, error, state, task);
         if (!continueOnFailures) {
           throw error;
         }
         value = undefined;
       }
       command = iterator.next();
-      options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
+      return value;
     },
+    initialState,
   );
 
-  return value;
+  return value as Return;
 };

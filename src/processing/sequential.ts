@@ -2,38 +2,38 @@ import { Commandable, ProcessingOptions } from 'processing/types';
 import { asyncDequeue } from './dequeue';
 import { ProcessingEvent } from './events';
 
-export const executeSequential = async <T = void, Subject = unknown>(
-  queue: Array<Commandable<T>>,
+export const executeSequential = async <Return = void, Subject = unknown>(
+  queue: Array<Commandable<unknown>>,
   options?: Partial<ProcessingOptions>,
-  initialState?: T,
   subject?: Subject,
-): Promise<Array<T | undefined>> => {
+  initialState?: unknown,
+): Promise<Return | undefined> => {
   const snapshot = options?.snapshot ?? true;
+  const eventEmitter = options?.eventEmitter;
   const continueOnFailures = options?.continueOnFailures ?? false;
-  const values: Array<T | undefined> = [];
+  let value: unknown = initialState;
   const iterator = asyncDequeue(snapshot ? [...queue] : queue);
 
   let command = await iterator.next();
-  options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
 
   while (!command.done) {
+    const task = command.value;
     try {
-      const value = await command.value.execute({
+      eventEmitter?.emit(ProcessingEvent.NextCommand, value, task);
+      value = await task.execute({
         subject,
-        state: initialState,
+        state: value,
       });
-      options?.eventEmitter?.emit(ProcessingEvent.CommandComplete, value);
-      values.push(value);
+      eventEmitter?.emit(ProcessingEvent.CommandComplete, value, task);
     } catch (error) {
-      options?.eventEmitter?.emit(ProcessingEvent.CommandFailed, error);
+      eventEmitter?.emit(ProcessingEvent.CommandFailed, error, value, task);
       if (!continueOnFailures) {
         throw error;
       }
-      values.push(undefined);
+      value = undefined;
     }
     command = await iterator.next();
-    options?.eventEmitter?.emit(ProcessingEvent.NextCommand, command);
   }
 
-  return values;
+  return value as Return;
 };
